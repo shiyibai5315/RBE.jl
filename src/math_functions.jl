@@ -26,25 +26,30 @@ function calculate_probability(k::Vector{Float64}, α::Float64, S::Float64)
 end
 
 
+function generate_k_vector(α::Float64, L::Float64) #sampling for 3 times
+    kx = mh_sample(α, L)
+    ky = mh_sample(α, L)
+    kz = mh_sample(α, L)
+    return [kx, ky, kz]
+end
+
+
 function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{Float64}, positions::Matrix{Float64})
     V = L^3
     S = calculate_S(α, L)
     Fi = zeros(Float64, 3)
-    
-    k_samples = [rand(Normal(0, sqrt(α * L^2 / (2 * π^2))), 3) for _ in 1:p] #produce the number of k samples
-    
     qi = charges[i]
     ri = positions[:, i]
     
-    for k_ell in k_samples
-        k2_ell = sum(k_ell .^ 2)
+    for i in 1 : p
+        kl = generate_k_vector(α,L) #sampling 3 times to have kl
+        k2_ell = sum(kl .^ 2) #magnitude of kl
         
-        rho_k = sum(charges[j] * exp(1im * dot(k_ell, positions[:, j])) for j in 1:length(charges))
-        exp_term = exp(-1im * dot(k_ell, ri)) #item in the summation equation
-
-        Fi += - (S / size(k_samples, 1)) * ((4 * π * k_ell * qi) / (V * k2_ell)) * imag(exp_term * rho_k)
+        rho_k = sum(charges[j] * exp(1im * dot(kl, positions[:, j])) for j in 1:length(charges))
+        exp_term = exp(-1im * dot(kl, ri)) #item in the force equation
+        
+        Fi += - (S / p) * ((4 * π * kl * qi) / (V * k2_ell)) * imag(exp_term * rho_k) #calculate force
     end
     
     return Fi
 end
-

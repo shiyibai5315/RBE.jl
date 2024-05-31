@@ -6,7 +6,6 @@ function example_usage()
     α = 3.0
     L = 50.0
     p = 5
-    num_samples = 1000
     
     H = calculate_H(α, L)
     S = calculate_S(α, L)
@@ -14,7 +13,7 @@ function example_usage()
     println("H = $H, S = $S")
     
 
-    samples = mh_sample(α, L, num_samples)
+    samples = mh_sample(α, L)
     println("Samples: ", samples)
     
     
@@ -34,6 +33,9 @@ function example_usage()
 end
 
 example_usage()
+
+
+
 
 
 
