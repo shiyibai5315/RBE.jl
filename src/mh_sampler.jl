@@ -7,7 +7,7 @@ function acceptance_probability(m_star::Int, α::Float64, L::Float64)
     end
 end
 
-# MH 采样
+# MH samling
 function mh_sample(α::Float64, L::Float64, num_samples::Int)
     samples = Int[]
     for _ in 1:num_samples
@@ -20,5 +20,3 @@ function mh_sample(α::Float64, L::Float64, num_samples::Int)
     end
     return samples
 end
-
-end # module MHSampler
