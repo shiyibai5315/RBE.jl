@@ -53,13 +53,12 @@ function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{F
     qi = charges[i]
     ri = [positions[i]...]
     
-    for i in 1 : p
-        kl = generate_k_vector(α,L) #sampling 3 times to have kl
-        k2_ell = sum(kl .^ 2) #magnitude of kl
+    kl = generate_k_vector(α,L) #sampling 3 times to have kl
+    k2_ell = sum(kl .^ 2) #magnitude of kl
+    rho_k = sum(charges[j] * exp(1im * dot(kl, [positions[j]...])) for j in 1:length(charges))
 
-        rho_k = sum(charges[j] * exp(1im * dot(kl, [positions[j]...])) for j in 1:length(charges))
+    for i in 1 : p
         exp_term = exp(-1im * dot(kl, ri)) #item in the force equation
-        
         Fi += - (S / p) * ((4 * π * kl * qi) / (V * k2_ell)) * imag(exp_term * rho_k) #calculate force
     end
     
@@ -81,6 +80,6 @@ function ExTinyMD.update_acceleration!(interaction::RBEInteraction, neighborfind
         Fi = RBE.calculate_Fi(i, n_atoms, L, α, charges, positions)
         info.particle_info[i].acceleration += Point{3, Float64}(Tuple(Fi / sys.atoms[i].mass))
     end
-
+    
     return nothing
 end

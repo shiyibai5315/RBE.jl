@@ -2,7 +2,7 @@ using RBE
 using ExTinyMD
 
 
-function example_usage()
+#begin
     α = 3.0
     L = 50.0
     p = 5
@@ -23,15 +23,15 @@ function example_usage()
     println("Probability for k = $k: $probability")
  
     #rbe process
-    charges = [1.0, -1.0, 0.5, -0.5, 1.5]
-    positions = [1.0 2.0 3.0 4.0 5.0; 0.0 -1.0 1.0 0.5 -0.5; 2.5 3.5 1.5 -2.0 0.0]
+    # charges = [1.0, -1.0, 0.5, -0.5, 1.5]
+    # positions = [1.0 2.0 3.0 4.0 5.0; 0.0 -1.0 1.0 0.5 -0.5; 2.5 3.5 1.5 -2.0 0.0]
     
     i = 1  # Index of the atom for which we want to calculate the force
 
-    #force = calculate_Fi(i, p, L, α, charges, positions)
-    #println("Force on atom $i: $force")
+    # force = calculate_Fi(i, p, L, α, charges, positions)
+    # println("Force on atom $i: $force")
     
-    #--------------------------MD process--------------------------
+    # #--------------------------MD process--------------------------
     n_atoms = 2
     atoms = create_atoms([(n_atoms, Atom(type = 1, mass = 1.0, charge = 1.0))])
 
@@ -56,11 +56,11 @@ function example_usage()
         simulator = simulator
     )
 
-    for (interaction, neighborfinder) in sys.interactions
-        if isa(interaction, LennardJones)
-            ExTinyMD.update_acceleration!(interaction, neighborfinder, sys, info)
-        end
-    end
+    # for (interaction, neighborfinder) in sys.interactions
+    #     if isa(interaction, LennardJones)
+    #         ExTinyMD.update_acceleration!(interaction, neighborfinder, sys, info)
+    #     end
+    # end
 
     # 计算额外的力 Fi 并添加到加速度中
     charges = [sys.atoms[i].charge for i in 1:n_atoms]
@@ -69,19 +69,18 @@ function example_usage()
 
     for i in 1:n_atoms
         Fi = RBE.calculate_Fi(i, n_atoms, L, α, charges, positions)
+        @show(Fi)
         info.particle_info[i].acceleration += Point{3, Float64}(Tuple(Fi / sys.atoms[i].mass))
     end
     
 
     println("Accelerations: ", [info.particle_info[i].acceleration for i in 1:n_atoms])
-
     simulator = VerletProcess(dt = 0.001, thermostat = AndersenThermoStat(1.0, 0.05))
-    simulate!(simulator, sys, info, 1)
+    simulate!(simulator, sys, info, 10000)
     
-end
+#end
 
 
-example_usage()
 
 
 
