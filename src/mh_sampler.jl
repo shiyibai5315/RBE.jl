@@ -1,4 +1,4 @@
-function acceptance_probability(m_star::Int, α::Float64, L::Float64)
+function acceptance_probability(m_star::Float64, α::Float64, L::Float64)
     if m_star == 0
         return erf(1 / (2 * sqrt(α * L^2 / π^2)))
     else
@@ -12,7 +12,7 @@ function mh_sample(α::Float64, L::Float64)
     samples = 0.0
     while true
         x_star = rand(Normal(0, sqrt(α * L^2 / (2 * π^2))))
-        m_star = round(Int, x_star)
+        m_star = Float64(round(Int, x_star))
         q = acceptance_probability(m_star, α, L)
         if rand() < q
             samples =  m_star

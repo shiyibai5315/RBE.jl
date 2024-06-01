@@ -34,18 +34,18 @@ function generate_k_vector(α::Float64, L::Float64) #sampling for 3 times
 end
 
 
-function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{Float64}, positions::Matrix{Float64})
+function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{Float64}, positions::Matrix{Tuple{Float64, Float64, Float64}})
     V = L^3
     S = calculate_S(α, L)
     Fi = zeros(Float64, 3)
     qi = charges[i]
-    ri = positions[:, i]
+    ri = [positions[i]...]
     
     for i in 1 : p
         kl = generate_k_vector(α,L) #sampling 3 times to have kl
         k2_ell = sum(kl .^ 2) #magnitude of kl
-        
-        rho_k = sum(charges[j] * exp(1im * dot(kl, positions[:, j])) for j in 1:length(charges))
+
+        rho_k = sum(charges[j] * exp(1im * dot(kl, [positions[j]...])) for j in 1:length(charges))
         exp_term = exp(-1im * dot(kl, ri)) #item in the force equation
         
         Fi += - (S / p) * ((4 * π * kl * qi) / (V * k2_ell)) * imag(exp_term * rho_k) #calculate force
@@ -54,14 +54,5 @@ function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{F
     return Fi
 end
 
-function rbe_acceleration!(sys::MDSys{T}, info::SimulationInfo{T}, boundary; α = 1.0) where {T <: Number}
-    n_atoms = length(sys.atoms)
-    positions = hcat([SVector{3}(info.particle_info[i].position) for i in 1:n_atoms]...)
-    charges = [sys.atoms[i].charge for i in 1:n_atoms]
-    L = boundary.length[1] # 假设立方体边界
-    
-    for i in 1:n_atoms
-        Fi = calculate_Fi(i, n_atoms, L, α, charges, positions)
-        info.particle_info[i].acceleration += Fi / sys.atoms[i].mass
-    end
-end
+
+

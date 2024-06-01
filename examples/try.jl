@@ -28,11 +28,11 @@ function example_usage()
     
     i = 1  # Index of the atom for which we want to calculate the force
 
-    force = calculate_Fi(i, p, L, α, charges, positions)
-    println("Force on atom $i: $force")
+    #force = calculate_Fi(i, p, L, α, charges, positions)
+    #println("Force on atom $i: $force")
     
-    #MD process
-    n_atoms = 5
+    #--------------------------MD process--------------------------
+    n_atoms = 2
     atoms = create_atoms([(n_atoms, Atom(type = 1, mass = 1.0, charge = 1.0))])
 
     min_r = 0.1
@@ -53,9 +53,27 @@ function example_usage()
         simulator = simulator
     )
 
-    rbe_acceleration!(sys, info, boundary; α)
+    for (interaction, neighborfinder) in sys.interactions
+        if isa(interaction, LennardJones)
+            ExTinyMD.update_acceleration!(interaction, neighborfinder, sys, info)
+        end
+    end
+
+    # 计算额外的力 Fi 并添加到加速度中
+    charges = [sys.atoms[i].charge for i in 1:n_atoms]
+    positions = hcat([info.particle_info[i].position.coo for i in 1:n_atoms]...)
+
+
+    #--------------------------MD process--------------------------
+    for i in 1:n_atoms
+        Fi = RBE.calculate_Fi(i, n_atoms, L, α, charges, positions)
+        info.particle_info[i].acceleration += Point{3, Float64}(Tuple(Fi / sys.atoms[i].mass))
+    end
+    
+
     println("Accelerations: ", [info.particle_info[i].acceleration for i in 1:n_atoms])
 end
+
 
 example_usage()
 
