@@ -53,3 +53,15 @@ function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{F
     
     return Fi
 end
+
+function rbe_acceleration!(sys::MDSys{T}, info::SimulationInfo{T}, boundary; α = 1.0) where {T <: Number}
+    n_atoms = length(sys.atoms)
+    positions = hcat([SVector{3}(info.particle_info[i].position) for i in 1:n_atoms]...)
+    charges = [sys.atoms[i].charge for i in 1:n_atoms]
+    L = boundary.length[1] # 假设立方体边界
+    
+    for i in 1:n_atoms
+        Fi = calculate_Fi(i, n_atoms, L, α, charges, positions)
+        info.particle_info[i].acceleration += Fi / sys.atoms[i].mass
+    end
+end
