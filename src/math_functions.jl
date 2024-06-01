@@ -71,6 +71,10 @@ function ExTinyMD.energy()
 end
 
 function ExTinyMD.update_acceleration!(interaction::RBEInteraction, neighborfinder, sys, info)
+    n_atoms = 2
+    L = 50.0
+    α = 3.0
+
     charges = [sys.atoms[i].charge for i in 1:n_atoms]
     positions = hcat([info.particle_info[i].position.coo for i in 1:n_atoms]...)
     update_finder!(neighborfinder, info)

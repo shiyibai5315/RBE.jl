@@ -76,7 +76,7 @@ using ExTinyMD
 
     println("Accelerations: ", [info.particle_info[i].acceleration for i in 1:n_atoms])
     simulator = VerletProcess(dt = 0.001, thermostat = AndersenThermoStat(1.0, 0.05))
-    simulate!(simulator, sys, info, 10000)
+    simulate!(simulator, sys, info, 100)
     
 #end
 
