@@ -56,30 +56,27 @@ function example_usage()
         simulator = simulator
     )
 
-    # for (interaction, neighborfinder) in sys.interactions
-    #     if isa(interaction, LennardJones)
-    #         ExTinyMD.update_acceleration!(interaction, neighborfinder, sys, info)
-    #     end
-    # end
+    for (interaction, neighborfinder) in sys.interactions
+        if isa(interaction, LennardJones)
+            ExTinyMD.update_acceleration!(interaction, neighborfinder, sys, info)
+        end
+    end
 
-    # # 计算额外的力 Fi 并添加到加速度中
-    # charges = [sys.atoms[i].charge for i in 1:n_atoms]
-    # positions = hcat([info.particle_info[i].position.coo for i in 1:n_atoms]...)
+    # 计算额外的力 Fi 并添加到加速度中
+    charges = [sys.atoms[i].charge for i in 1:n_atoms]
+    positions = hcat([info.particle_info[i].position.coo for i in 1:n_atoms]...)
 
 
-    # for i in 1:n_atoms
-    #     Fi = RBE.calculate_Fi(i, n_atoms, L, α, charges, positions)
-    #     @show Fi
-    #     @show info.particle_info[i].acceleration
-    #     info.particle_info[i].acceleration += Point{3, Float64}(Tuple(Fi / sys.atoms[i].mass))
-    #     @show info.particle_info[i].acceleration
-    # end
+    for i in 1:n_atoms
+        Fi = RBE.calculate_Fi(i, n_atoms, L, α, charges, positions)
+        info.particle_info[i].acceleration += Point{3, Float64}(Tuple(Fi / sys.atoms[i].mass))
+    end
     
 
-    # println("Accelerations: ", [info.particle_info[i].acceleration for i in 1:n_atoms])
+    println("Accelerations: ", [info.particle_info[i].acceleration for i in 1:n_atoms])
 
-    # simulator = VerletProcess(dt = 0.001, thermostat = AndersenThermoStat(1.0, 0.05))
-    # simulate!(simulator, sys, info, 1)
+    simulator = VerletProcess(dt = 0.001, thermostat = AndersenThermoStat(1.0, 0.05))
+    simulate!(simulator, sys, info, 1)
     
 end
 

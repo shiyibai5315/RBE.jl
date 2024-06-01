@@ -1,3 +1,15 @@
+struct RBEInteraction{T} <: ExTinyMD.AbstractInteraction
+    α::T
+    cutoff::T
+    ε::T
+end
+
+Base.show(io::IO, interaction::RBEInteraction) = print(io, "RBEInteraction with α = $(interaction.α), cutoff = $(interaction.cutoff), ε = $(interaction.ε)")
+
+RBEInteraction(;α::T = 1.0, cutoff::T = 3.5, ε::T = 1.0) where T = RBEInteraction(α, cutoff, ε)
+
+
+
 function calculate_H(α, L)
   
     const_part = sqrt(α * L^2 / π)
@@ -55,26 +67,20 @@ function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{F
 end
 
 
-struct RBEInteraction{T} <: ExTinyMD.AbstractInteraction
-    α::T
-    cutoff::T
-    ε::T
-end
-
-Base.show(io::IO, interaction::RBEInteraction) = print(io, "RBEInteraction with α = $(interaction.α), cutoff = $(interaction.cutoff), ε = $(interaction.ε)")
-
-RBEInteraction(;α::T = 1.0, cutoff::T = 3.5, ε::T = 1.0) where T = RBEInteraction(α, cutoff, ε)
-
-
 function ExTinyMD.energy()
 
 end
 
 function ExTinyMD.update_acceleration!(interaction::RBEInteraction, neighborfinder, sys, info)
-
+    charges = [sys.atoms[i].charge for i in 1:n_atoms]
+    positions = hcat([info.particle_info[i].position.coo for i in 1:n_atoms]...)
+    update_finder!(neighborfinder, info)
     # calculate Fi
-
     # update the particle info according to Fi
+    for i in 1:n_atoms
+        Fi = RBE.calculate_Fi(i, n_atoms, L, α, charges, positions)
+        info.particle_info[i].acceleration += Point{3, Float64}(Tuple(Fi / sys.atoms[i].mass))
+    end
 
     return nothing
 end
