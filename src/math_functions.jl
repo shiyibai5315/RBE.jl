@@ -55,4 +55,26 @@ function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{F
 end
 
 
+struct RBEInteraction{T} <: ExTinyMD.AbstractInteraction
+    α::T
+    cutoff::T
+    ε::T
+end
 
+Base.show(io::IO, interaction::RBEInteraction) = print(io, "RBEInteraction with α = $(interaction.α), cutoff = $(interaction.cutoff), ε = $(interaction.ε)")
+
+RBEInteraction(;α::T = 1.0, cutoff::T = 3.5, ε::T = 1.0) where T = RBEInteraction(α, cutoff, ε)
+
+
+function ExTinyMD.energy()
+
+end
+
+function ExTinyMD.update_acceleration!(interaction::RBEInteraction, neighborfinder, sys, info)
+
+    # calculate Fi
+
+    # update the particle info according to Fi
+
+    return nothing
+end
