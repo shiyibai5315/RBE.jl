@@ -8,8 +8,6 @@ Base.show(io::IO, interaction::RBEInteraction) = print(io, "RBEInteraction with 
 
 RBEInteraction(;α::T = 1.0, cutoff::T = 3.5, ε::T = 1.0) where T = RBEInteraction(α, cutoff, ε)
 
-
-
 function calculate_H(α, L)
   
     const_part = sqrt(α * L^2 / π)
@@ -25,7 +23,7 @@ function calculate_H(α, L)
     
     return H
 end
-
+ 
 function calculate_S(α::Float64, L::Float64)
     H = calculate_H(α, L)
     return H^3 - 1
@@ -37,53 +35,86 @@ function calculate_probability(k::Vector{Float64}, α::Float64, S::Float64)
     return exp(-k2 / (4 * α)) / S
 end
 
-
-function generate_k_vector(α::Float64, L::Float64) #sampling for 3 times
+function generate_k_vector(α::Float64, L::Float64) 
     kx = mh_sample(α, L)
     ky = mh_sample(α, L)
     kz = mh_sample(α, L)
     return [kx, ky, kz]
 end
 
-
-function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{Float64}, positions::Matrix{Tuple{Float64, Float64, Float64}})
+function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{Float64}, positions::Matrix{Tuple{Float64, Float64, Float64}}, rho_k::Vector{Complex{Float64}}, samples::Vector)
     V = L^3
-    S = calculate_S(α, L)
     Fi = zeros(Float64, 3)
     qi = charges[i]
     ri = [positions[i]...]
-    
-    kl = generate_k_vector(α,L) #sampling 3 times to have kl
-    k2_ell = sum(kl .^ 2) #magnitude of kl
-    rho_k = sum(charges[j] * exp(1im * dot(kl, [positions[j]...])) for j in 1:length(charges))
 
-    for i in 1 : p
-        exp_term = exp(-1im * dot(kl, ri)) #item in the force equation
-        Fi += - (S / p) * ((4 * π * kl * qi) / (V * k2_ell)) * imag(exp_term * rho_k) #calculate force
+    for j in 1:p
+        k2_ell = norm(samples[j])^2
+        exp_term = exp(-1im * dot(samples[j], ri))
+        imag_part = imag(exp_term * rho_k[j])
+        Fi += - (4 * π * samples[j] * qi) / (V * k2_ell) * imag_part
     end
-    
+
     return Fi
 end
-
 
 function ExTinyMD.energy()
 
 end
 
+function update_rho_k(p::Int, charges::Vector{Float64}, positions::Matrix{Tuple{Float64, Float64, Float64}}, samples::Vector{Any})
+    n_atoms = length(charges)
+    rho_k = zeros(Complex{Float64}, p)
+    for i in 1:p
+        rho_k[i] = sum(charges[j] * exp(1im * dot(samples[i], [positions[j]...])) for j in 1:n_atoms)
+    end
+    return rho_k
+end
+
 function ExTinyMD.update_acceleration!(interaction::RBEInteraction, neighborfinder, sys, info)
-    n_atoms = 2
+    n_atoms = 100
     L = 50.0
     α = 3.0
+    p = 5
 
     charges = [sys.atoms[i].charge for i in 1:n_atoms]
     positions = hcat([info.particle_info[i].position.coo for i in 1:n_atoms]...)
     update_finder!(neighborfinder, info)
-    # calculate Fi
-    # update the particle info according to Fi
+    samples = sampling(α, L, p)
+    rho_k = update_rho_k(p, charges, positions, samples)
+
     for i in 1:n_atoms
-        Fi = RBE.calculate_Fi(i, n_atoms, L, α, charges, positions)
-        info.particle_info[i].acceleration += Point{3, Float64}(Tuple(Fi / sys.atoms[i].mass))
+        Fi = RBE.calculate_Fi(i, p, L, α, charges, positions, rho_k, samples)
+        Fi2 = calculate_Fi_short(i, p, L, α, charges, positions)
+        info.particle_info[i].acceleration += Point{3, Float64}(Tuple((Fi + Fi2) / sys.atoms[i].mass))
     end
-    
+
     return nothing
+end
+
+function calculate_G(r::Float64, α::Float64)
+    term1 = erfc(sqrt(α) * r) / r^2
+    term2 = (2 * sqrt(α) * exp(-α * r^2)) / (sqrt(π) * r)
+    return term1 + term2
+end
+
+function calculate_Fi_short(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{Float64}, positions::Matrix{Tuple{Float64, Float64, Float64}})
+    Fi2 = zeros(Float64, 3)
+    qi = charges[i]
+    ri = [positions[i]...]
+
+    for j in 1:length(charges)
+        if i != j
+            rj = [positions[j]...]
+            rij = rj - ri
+            rij_pbc = mod.(rij .+ L / 2, L) .- L / 2  
+            rij_norm = norm(rij_pbc)
+            if rij_norm != 0.0
+                G_rij = calculate_G(rij_norm, α)  
+                Fi2 += - qi * charges[j] * G_rij * rij_pbc / rij_norm
+            end
+        end
+    end
+
+    return Fi2
 end
