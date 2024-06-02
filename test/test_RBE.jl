@@ -8,7 +8,7 @@ using LinearAlgebra
     α = 3.0
     L = 50.0
     H = calculate_H(α, L)
-    @test isapprox(H, 48.86, atol=0.01)  # 假设值，需根据实际计算结果调整
+    @test isapprox(H, 48.86, atol=0.01)  
 end
 
 # Test for calculate_S
@@ -16,7 +16,7 @@ end
     α = 3.0
     L = 50.0
     S = calculate_S(α, L)
-    @test isapprox(S, 116644.2574, atol=0.01)  # 假设值，需根据实际计算结果调整
+    @test isapprox(S, 116644.2574, atol=0.01)  
 end
 
 # Test for calculate_probability
@@ -26,7 +26,7 @@ end
     k = [1.0, 0.0, 0.0]
     S = calculate_S(α, L)
     probability = calculate_probability(k, α, S)
-    @test isapprox(probability, 7.887610025789391e-6, atol=0.001)  # 假设值，需根据实际计算结果调整
+    @test isapprox(probability, 7.887610025789391e-6, atol=0.001)  
 end
 
 # Test for mh_sample

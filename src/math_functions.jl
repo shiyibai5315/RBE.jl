@@ -29,7 +29,6 @@ function calculate_S(α::Float64, L::Float64)
     return H^3 - 1
 end
 
-
 function calculate_probability(k::Vector{Float64}, α::Float64, S::Float64)
     k2 = sum(k .^ 2)
     return exp(-k2 / (4 * α)) / S
@@ -56,10 +55,6 @@ function calculate_Fi(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{F
     end
 
     return Fi
-end
-
-function ExTinyMD.energy()
-
 end
 
 function update_rho_k(p::Int, charges::Vector{Float64}, positions::Matrix{Tuple{Float64, Float64, Float64}}, samples::Vector{Any})
@@ -117,4 +112,8 @@ function calculate_Fi_short(i::Int, p::Int, L::Float64, α::Float64, charges::Ve
     end
 
     return Fi2
+end
+
+function ExTinyMD.energy()
+
 end

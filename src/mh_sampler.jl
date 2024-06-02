@@ -7,7 +7,6 @@ function acceptance_probability(m_star::Float64, α::Float64, L::Float64)
     end
 end
 
-# MH samling
 function mh_sample(α::Float64, L::Float64)
     sample = 0.0
     while sample == 0.0
