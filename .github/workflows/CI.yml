@@ -7,8 +7,6 @@ on:
   pull_request:
   workflow_dispatch:
 concurrency:
-  # Skip intermediate builds: always.
-  # Cancel intermediate builds: only if it is a pull request build.
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
@@ -16,7 +14,7 @@ jobs:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    permissions: # needed to allow julia-actions/cache to proactively delete old caches that it has created
+    permissions:
       actions: write
       contents: read
     strategy:
@@ -24,7 +22,7 @@ jobs:
       matrix:
         version:
           - '1.10'
-          - 'nightly'
+          - '1.7'  
         os:
           - ubuntu-latest
         arch:
@@ -37,8 +35,18 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v1
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          julia --project=@. -e 'using Pkg; Pkg.instantiate()'
+      - name: Build package
+        run: |
+          echo "Building package..."
+          julia --project=@. -e 'using Pkg; Pkg.build()'
+      - name: Run tests with detailed output
+        run: |
+          echo "Running tests..."
+          julia --project=@. -e 'using Pkg; Pkg.test(verbose=true)'
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
         with:
@@ -47,7 +55,7 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     permissions:
-      actions: write # needed to allow julia-actions/cache to proactively delete old caches that it has created
+      actions: write
       contents: write
       statuses: write
     steps:
@@ -59,16 +67,21 @@ jobs:
       - name: Configure doc environment
         shell: julia --project=docs --color=yes {0}
         run: |
+          echo "Configuring documentation environment..."
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
-      - uses: julia-actions/julia-buildpkg@v1
+      - name: Build documentation
+        run: |
+          echo "Building documentation..."
+          julia --project=docs -e 'using Pkg; Pkg.build()'
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run doctests
         shell: julia --project=docs --color=yes {0}
         run: |
+          echo "Running doctests..."
           using Documenter: DocMeta, doctest
           using RBE
           DocMeta.setdocmeta!(RBE, :DocTestSetup, :(using RBE); recursive=true)
