@@ -45,6 +45,5 @@ begin
     
     simulator = VerletProcess(dt = 0.001, thermostat = AndersenThermoStat(1.0, 0.05))
     simulate!(simulator, sys, info, 100)
-    result = @benchmark simulate!(simulator, sys, info, 100)
     
 end
