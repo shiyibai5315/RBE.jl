@@ -39,17 +39,11 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v1
       - name: Install dependencies
-        run: |
-          echo "Installing dependencies..."
-          julia --project=@. -e 'using Pkg; Pkg.instantiate()'
+        run: julia --project=@. -e 'using Pkg; Pkg.instantiate()'
       - name: Build package
-        run: |
-          echo "Building package..."
-          julia --project=@. -e 'using Pkg; Pkg.build()'
+        run: julia --project=@. -e 'using Pkg; Pkg.build()'
       - name: Run tests with detailed output
-        run: |
-          echo "Running tests..."
-          julia --project=@. test/run_tests.jl
+        run: julia --project=@. test/run_tests.jl
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
         with:
@@ -71,21 +65,19 @@ jobs:
       - name: Configure doc environment
         shell: julia --project=docs --color=yes {0}
         run: |
-          echo "Configuring documentation environment..."
+          println("Configuring documentation environment...")
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
       - name: Build documentation
-        run: |
-          echo "Building documentation..."
-          julia --project=docs -e 'using Pkg; Pkg.build()'
+        run: julia --project=docs -e 'println("Building documentation..."); using Pkg; Pkg.build()'
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run doctests
         shell: julia --project=docs --color=yes {0}
         run: |
-          echo "Running doctests..."
+          println("Running doctests...")
           using Documenter: DocMeta, doctest
           using RBE
           DocMeta.setdocmeta!(RBE, :DocTestSetup, :(using RBE); recursive=true)
