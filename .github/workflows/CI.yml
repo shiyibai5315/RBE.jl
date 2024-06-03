@@ -1,4 +1,5 @@
 name: CI
+
 on:
   push:
     branches:
@@ -6,9 +7,11 @@ on:
     tags: ['*']
   pull_request:
   workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -46,11 +49,12 @@ jobs:
       - name: Run tests with detailed output
         run: |
           echo "Running tests..."
-          julia --project=@. test/run_test.jl
+          julia --project=@. test/run_tests.jl
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
         with:
           files: lcov.info
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest
