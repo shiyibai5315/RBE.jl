@@ -46,7 +46,7 @@ jobs:
       - name: Run tests with detailed output
         run: |
           echo "Running tests..."
-          julia --project=@. -e 'using Pkg; Pkg.test(verbose=true)'
+          julia --project=@. test/run_test.jl
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
         with:
