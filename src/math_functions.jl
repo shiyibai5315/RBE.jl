@@ -67,8 +67,8 @@ function update_rho_k(p::Int, charges::Vector{Float64}, positions::Matrix{Tuple{
 end
 
 function ExTinyMD.update_acceleration!(interaction::RBEInteraction, neighborfinder, sys, info)
-    n_atoms = 100
-    L = 50.0
+    n_atoms = 99
+    L = 100.0
     α = 3.0
     p = 5
 
