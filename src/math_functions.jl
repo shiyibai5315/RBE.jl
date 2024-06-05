@@ -93,27 +93,33 @@ function calculate_G(r::Float64, α::Float64)
     return term1 + term2
 end
 
-function calculate_Fi_short(i::Int, p::Int, L::Float64, α::Float64, charges::Vector{Float64}, positions::Matrix{Tuple{Float64, Float64, Float64}})
-    Fi2 = zeros(Float64, 3)
-    qi = charges[i]
-    ri = [positions[i]...]
+function calculate_Fi_short(charges::Vector{Float64}, positions::Matrix{Point{3, Float64}}, neighborfinder::AbstractNeighborFinder, α::Float64, L::Float64)
+    neighbor_list = neighborfinder.neighbor_list
 
-    for j in 1:length(charges)
-        if i != j
-            rj = [positions[j]...]
-            rij = rj - ri
-            rij_pbc = mod.(rij .+ L / 2, L) .- L / 2  
-            rij_norm = norm(rij_pbc)
-            if rij_norm != 0.0
-                G_rij = calculate_G(rij_norm, α)  
-                Fi2 += - qi * charges[j] * G_rij * rij_pbc / rij_norm
-            end
+    n_atoms = length(charges)
+    force_short = [Point(zero(Float64), zero(Float64), zero(Float64)) for _=1:n_atoms]
+    boundary = Boundary(L, (1, 1, 1))
+
+    for (i, j, ρ) in neighbor_list
+        coord_1, coord_2, r_sq = position_check3D(positions[i], positions[j], boundary, L)
+        if iszero(r_sq)
+            nothing
+        else
+            q_1 = charges[i]
+            q_2 = charges[j]
+            F_ij = calculate_Fs_pair(q_1, q_2, α, coord_1, coord_2)
+            force_short[i] += F_ij
+            force_short[j] -= F_ij
         end
     end
 
-    return Fi2
+    return force_short
 end
 
-function ExTinyMD.energy()
-
+function calculate_Fs_pair(q1::Float64, q2::Float64, α::Float64, coord_1::Point{3, Float64}, coord_2::Point{3, Float64})::Point{3, Float64}
+    rij = coord_2 - coord_1
+    r = norm(rij)
+    G_r = calculate_G(r, α)
+    F_ij = -q1 * q2 * G_r * rij / r
+    return F_ij
 end
