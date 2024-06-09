@@ -12,7 +12,7 @@ include("mh_sampler.jl")
 include("../test/run_tests.jl")
 
 
-export generate_k_set, compute_probabilities, calculate_H, calculate_S, calculate_G, calculate_F_short, calculate_F_long, calculate_F_direct 
+export generate_k_set, compute_probabilities, calculate_H, calculate_S, calculate_G, calculate_F_short, calculate_F_long 
 export RBEInteractions
 
 

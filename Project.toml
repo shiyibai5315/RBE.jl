@@ -19,6 +19,19 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "1.10"
+BenchmarkTools = "1.5.0"
+Colors = "0.12.11"
+Distributions = "0.25.109"
+EwaldSummations = "0.1.3"
+ExTinyMD = "0.2.6"
+Makie = "0.21.2"
+SpecialFunctions = "2.4.0"
+StaticArrays = "1.9.4"
+StatsBase = "0.34.3"
+LinearAlgebra = "1.0"  
+Random = "1.0"         
+Test = "1.0"           
+
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

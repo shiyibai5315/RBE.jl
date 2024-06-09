@@ -1,8 +1,0 @@
-[deps]
-Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
-ExTinyMD = "fec76197-d59f-46dd-a0ed-76a83c21f7aa"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
-RBE = "f2c4a98e-7370-4e85-a790-e68c86399b2d"
-Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
-SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
