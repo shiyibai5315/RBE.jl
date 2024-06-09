@@ -26,7 +26,7 @@ The Random Batch Ewald (RBE) method is designed to efficiently calculate long-ra
 
 **Ewald Splitting**:
 The Coulomb potential $\frac{1}{r}$ is split into two parts:
-$$ \frac{1}{r} = \frac{\text{erfc}(\sqrt{\alpha} r)}{r} + \frac{\text{erf}(\sqrt{\alpha} r)}{r} $$
+$ \frac{1}{r} = \frac{\text{erfc}(\sqrt{\alpha} r)}{r} + \frac{\text{erf}(\sqrt{\alpha} r)}{r} $
 where \(\alpha\) is a screening parameter.
 
 **Generating k-space Vectors**:
