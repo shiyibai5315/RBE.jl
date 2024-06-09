@@ -26,17 +26,23 @@ The Random Batch Ewald (RBE) method is designed to efficiently calculate long-ra
 
 **Ewald Splitting**:
 The Coulomb potential $\frac{1}{r}$ is split into two parts:
-$ \frac{1}{r} = \frac{\text{erfc}(\sqrt{\alpha} r)}{r} + \frac{\text{erf}(\sqrt{\alpha} r)}{r} $
+```math
+ \frac{1}{r} = \frac{\text{erfc}(\sqrt{\alpha} r)}{r} + \frac{\text{erf}(\sqrt{\alpha} r)}{r} 
+ ```
 where \(\alpha\) is a screening parameter.
 
 **Generating k-space Vectors**:
 The k-space vectors are generated such that their magnitude is within a cutoff \(k_c\):
-$$ \mathbf{k} = \left( \frac{2\pi m_1}{L_x}, \frac{2\pi m_2}{L_y}, \frac{2\pi m_3}{L_z} \right) $$
+```math
+\mathbf{k} = \left( \frac{2\pi m_1}{L_x}, \frac{2\pi m_2}{L_y}, \frac{2\pi m_3}{L_z} \right)
+```
 where \( \|\mathbf{k}\| \leq k_c \).
 
 **Computing Probabilities**:
 For each k-vector \(\mathbf{k}\), the probability is given by:
-$$ P(\mathbf{k}) = \frac{\exp\left(-\frac{\|\mathbf{k}\|^2}{4\alpha}\right)}{S} $$
+```math
+P(\mathbf{k}) = \frac{\exp\left(-\frac{\|\mathbf{k}\|^2}{4\alpha}\right)}{S} 
+```
 where \(S\) is a normalization constant.
 
 **Sampling from k-space**:
@@ -44,7 +50,9 @@ Randomly sample \(p\) k-vectors based on their probabilities to form a minibatch
 
 **Force Calculation**:
 The long-range force on particle \(i\) due to the k-space component is:
-$$ \mathbf{F}_i^{\text{long}} = -\sum_{j=1}^{p} \frac{4\pi \mathbf{k}_j q_i}{V \|\mathbf{k}_j\|^2} \Im \left( \exp(-i \mathbf{k}_j \cdot \mathbf{r}_i) \rho_k[j] \right) $$
+```math
+\mathbf{F}_i^{\text{long}} = -\sum_{j=1}^{p} \frac{4\pi \mathbf{k}_j q_i}{V \|\mathbf{k}_j\|^2} \Im \left( \exp(-i \mathbf{k}_j \cdot \mathbf{r}_i) \rho_k[j] \right)
+```
 
 ## Overview of the workflow in RBE process. 
 
